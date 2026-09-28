@@ -111,7 +111,7 @@ internal final class SC_SalesInvoice_Handler
                     emailContract.parmSubject("ICDOC Bill");
                 }
                 englishPaymentText = "Please <b>use Invoice Reference -Edaat Invoice No</b> SADAD system as mentioned in your bill.";
-                arabicPaymentText = "برجاء سداد كامل المستحقات </b> باستخدام رقم دليل الفاتورة - فاتورة ايداعات <b> المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد";
+                arabicPaymentText = "برجاء سداد كامل المستحقات <b> باستخدام رقم دليل الفاتورة - فاتورة ايداعات </b> المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد";
 
                 switch (mthOfYr(Startdate))
                 {
