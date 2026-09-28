@@ -1,0 +1,308 @@
+internal final class SC_SalesInvoice_Handler
+{
+    
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    [FormControlEventHandler(formControlStr(CustInvoiceJournal, SCButtonNewSend), FormControlEventType::Clicked)]
+    public static void SCButtonNewSend_OnClicked(FormControl sender, FormControlEventArgs e)
+    {
+
+        FormDataSource                  CustInvoiceJour_ds = sender.formRun().dataSource(formDataSourceStr(CustInvoiceJournal, CustInvoiceJour));
+
+        Args                            args = new Args();
+        ReportRun                       reportRun;
+        Filename                        fileName;
+        boolean                         EmailSend;
+        CustInvoiceJour                 records,recordsUpdate;
+        SrsReportRunController          controller;
+        SRSPrintDestinationSettings     printSettings;
+        SrsReportEMailDataContract      emailContract;
+        ICDCSalesInvoiceReportContract  rdpContract;
+        SrsReportDataContract           contract;
+        str                             mailBody;
+        userinfo                        userInfo;
+        SysUserInfo                     sysUserInfo;
+        SrsReportRunImpl                srsReportRun;
+        CustInvoiceSendLog              custInvoiceSendLog;
+        CommissionSalesGroup CommissionSalesGroup;
+        SalesLine SalesLine;
+        SalesTable SalesTable;
+        date Startdate;
+        
+        #AviFiles
+        SysOperationProgress progress = new SysOperationProgress();
+        int counter = 0;
+        ;
+        
+        progress.setCaption("Sending invoices to customers emails..");
+        progress.setAnimation(#AviUpdate);
+        progress.setTotal(counter);
+        
+        records = CustInvoiceJour_ds.getFirst(1);
+        while (records)
+        {
+            counter++;
+            records = CustInvoiceJour_ds.getNext();
+        
+        }
+        progress.setTotal(counter);
+        counter = 1;
+        
+        records = CustInvoiceJour_ds.getFirst(1);
+        while (records)
+        {
+        
+            progress.setText(strfmt("Sending invoice to customer %1 %2", records.InvoiceId,records.custTable_InvoiceAccount().name()));
+            progress.setCount(counter, 1);
+        
+            if(!CustTable::find(records.InvoiceAccount).email())
+            {
+                info(strFmt("Customer %1 dose not have email",records.InvoiceAccount));
+        
+                custInvoiceSendLog.clear();
+                custInvoiceSendLog.InvoiceAccount   = records.InvoiceAccount;
+                custInvoiceSendLog.InvoiceId        = records.InvoiceId;
+                custInvoiceSendLog.SalesId          = records.SalesId;
+                custInvoiceSendLog.SendDate         = DateTimeUtil::getToday(DateTimeUtil::getUserPreferredTimeZone());
+                custInvoiceSendLog.Sent             = NoYes::No;
+                custInvoiceSendLog.ErrorMsg         = 'Customer dose not have email';
+                custInvoiceSendLog.insert();
+        
+                records = CustInvoiceJour_ds.getNext();
+                continue;
+            }
+        
+            emailContract = new SrsReportEMailDataContract();
+            emailContract.parmAttachmentFileFormat(SRSReportFileFormat::PDF);
+       
+            CommissionSalesGroup=CommissionSalesGroup::find(CustTable::find(records.InvoiceAccount).SalesGroup,false);
+            //ShippingDateRequested
+            SalesTable=SalesTable::find(Records.SalesId,false);
+            select firstonly * from SalesLine where SalesLine.SalesId==SalesTable.SalesId && SalesLine.FlowMeterNumber !="";
+            if(SalesLine && SalesTable.SalesType!=SalesType::Subscription)
+            {
+                Startdate=mkDate(1,mthOfYr(SalesLine.ShippingDateRequested),year(SalesLine.ShippingDateRequested));
+
+            }
+            else if(SalesTable.StartDate && SalesTable.EndDate)
+            {
+                Startdate=SalesTable.StartDate;
+            }
+            else
+            {
+                Startdate=mkDate(1,mthOfYr(records.InvoiceDate),year(records.InvoiceDate));
+            }
+            //////////////////////
+            if(CommissionSalesGroup.ISSadad)
+            {
+
+           
+                if(records.DataAreaId == 'mjic')
+                {
+                    emailContract.parmSubject("Clear Water Bill");
+                }
+                else
+                {
+                    emailContract.parmSubject("ICDOC Bill");
+                }
+                mailBody = " عميلنا العزيز "+"\n\n";
+                mailBody = mailBody + " السلام عليكم ورحمة الله وبركاته "+"\n\n";
+               
+                
+                switch (mthOfYr(Startdate))
+                {
+                    case 1:
+                        mailBody = mailBody +  "لقد تم اصدار فاتورة شهر يناير، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        break;
+                    case 2:
+                        mailBody = mailBody +  "لقد تم اصدار فاتورة شهر فبراير، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        break;
+                    case 3:
+                        mailBody = mailBody +  "لقد تم اصدار فاتورة شهر مارس، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        break;
+                    case 4:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر ابريل، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        break;
+                    case 5:
+                        mailBody = mailBody +  "لقد تم اصدار فاتورة شهر مايو، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        break;
+                    case 6:
+                        mailBody = mailBody +  "لقد تم اصدار فاتورة شهر يونيو، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        break;
+                    case 7:
+                        mailBody = mailBody +  "لقد تم اصدار فاتورة شهر يوليو، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        break;
+                    case 8:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر اغسطس، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        break;
+                    case 9:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر سبتمبر، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        break;
+                    case 10:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر اكتوبر، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        break;
+                    case 11:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر نوفمبر، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        break;
+                    case 12:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر ديسمبر، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        break;
+                }
+                mailBody = mailBody + "\n\n Dear Valued Customer, \n\n";
+                mailBody = mailBody + " Hope That this email finds you well.\n\n";
+                mailBody = mailBody + " Kindly , find the attached bill for the month of "+ mthName(mthOfYr(Startdate));
+                mailBody = mailBody + ", please use your account number to pay through SADAD system as mentioned in your bill.\n\n";
+            }
+            else //if(CustTable::find(records.InvoiceAccount).CustGroup == '02')
+            {
+                Info("2");
+                if(records.DataAreaId == 'mjic')
+                {
+                    emailContract.parmSubject("Clear Water Bill");
+                }
+                else
+                {
+                    emailContract.parmSubject("ICDOC Bill");
+                }
+                mailBody = "Dear Valued Customer,\n\n";
+                mailBody = mailBody + " Hope That this email finds you well.\n\n";
+                mailBody = mailBody + " Kindly , find the attached bill for the month of "+ mthName(mthOfYr(Startdate));
+                mailBody = mailBody + " عميلنا العزيز "+"\n\n";
+                mailBody = mailBody + " السلام عليكم ورحمة الله وبركاته "+"\n\n";
+                switch (mthOfYr(Startdate))
+                {
+                    case 1:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر يناير، برجاء سداد كامل المستحقات"+"\n\n";
+                        break;
+                    case 2:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر فبراير، برجاء سداد كامل المستحقات "+"\n\n";
+                        break;
+                    case 3:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر مارس، برجاء سداد كامل المستحقات"+"\n\n";
+                        break;
+                    case 4:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر ابريل، برجاء سداد كامل المستحقات "+"\n\n";
+                        break;
+                    case 5:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر مايو، برجاء سداد كامل المستحقات "+"\n\n";
+                        break;
+                    case 6:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر يونيو، برجاء سداد كامل المستحقات"+"\n\n";
+                        break;
+                    case 7:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر يوليو، برجاء سداد كامل المستحقات"+"\n\n";
+                        break;
+                    case 8:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر اغسطس، برجاء سداد كامل المستحقات "+"\n\n";
+                        break;
+                    case 9:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر سبتمبر، برجاء سداد كامل المستحقات"+"\n\n";
+                        break;
+                    case 10:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر اكتوبر، برجاء سداد كامل المستحقات"+"\n\n";
+                        break;
+                    case 11:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر نوفمبر، برجاء سداد كامل المستحقات"+"\n\n";
+                        break;
+                    case 12:
+                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر ديسمبر، برجاء سداد كامل المستحقات "+"\n\n";
+                        break;
+                }
+            }
+            //else
+            //{
+            //    emailContract.parmSubject("Invoice number "+ records.InvoiceId +" for "+records.custTable_InvoiceAccount().name());
+            //    mailBody = "Please find attached PDF file for sales invoice";
+            //}
+        
+            select userinfo where userinfo.id == curUserId();
+            emailContract.parmBody(mailBody);
+            emailContract.parmTo(CustTable::find(records.InvoiceAccount).email());
+        
+            controller = new SrsReportRunController();
+            CommissionSalesGroup=CommissionSalesGroup::find(CustTable::find(records.InvoiceAccount).SalesGroup,false);
+            controller.parmReportName("ICDCSalesInvoiceReport.ReportNew");
+            // if(CommissionSalesGroup.ISSadad)
+            // {
+            //// if(CustTable::find(records.InvoiceAccount).CustGroup == '03')
+            //// {
+            //controller.parmReportName("ICDCSalesInvoiceReport.Report");
+
+            // }
+            // else// if(CustTable::find(records.InvoiceAccount).CustGroup == '02')
+            // {
+            //     controller.parmReportName("ICDCSalesInvoiceReport.ReportJeddah");
+
+
+            // }
+            //   Info(strFmt("%1",CommissionSalesGroup.ISSadad));
+            //else
+            //{
+            //    controller.parmReportName("ICDCSalesInvoiceReport.Report");
+            //}
+        
+            //controller.parmReportName("ICDCSalesInvoiceReport.Report");
+            controller.parmLoadFromSysLastValue(false);
+            controller.parmShowDialog(false);
+            contract    = controller.parmReportContract();
+            rdpContract = contract.parmRdpContract() as ICDCSalesInvoiceReportContract;
+            rdpContract.parmRecId(records.RecId);
+        
+            srsReportRun = controller.parmReportRun() as SrsReportRunImpl;
+            controller.parmReportRun(srsReportRun);
+        
+            controller.parmReportContract().parmPrintSettings().landscape(false);
+            controller.parmReportContract().parmPrintSettings().printMediumType(SRSPrintMediumType::Email);
+            controller.parmReportContract().parmPrintSettings().fileFormat(SRSReportFileFormat::PDF);
+            controller.parmReportContract().parmPrintSettings().overwriteFile(true);
+            controller.parmReportContract().parmPrintSettings().fromPage(1);
+            controller.parmReportContract().parmPrintSettings().toPage(1);
+        
+            printSettings = controller.parmReportContract().parmPrintSettings();
+        
+            printSettings.printMediumType(SRSPrintMediumType::Email);
+            printSettings.parmEMailContract(emailContract);
+            printSettings.fileFormat(SRSReportFileFormat::PDF);
+            // SrsReportRunPrinter.getAttachmentName() uses this value, then adds the file extension.
+            printSettings.parmFileName(strFmt("Invoice_%1", records.InvoiceId));
+        
+            controller.parmShowDialog(false);
+        
+            controller.startOperation();
+        
+            EmailSend = true;
+        
+            info(strfmt("Sending invoice to customer %1 %2", records.InvoiceId,records.custTable_InvoiceAccount().name()));
+        
+            custInvoiceSendLog.clear();
+            custInvoiceSendLog.InvoiceAccount   = records.InvoiceAccount;
+            custInvoiceSendLog.InvoiceId        = records.InvoiceId;
+            custInvoiceSendLog.SalesId          = records.SalesId;
+            custInvoiceSendLog.SendDate         = DateTimeUtil::getToday(DateTimeUtil::getUserPreferredTimeZone());
+            custInvoiceSendLog.Sent             = NoYes::Yes;
+            custInvoiceSendLog.ErrorMsg         = '';
+            custInvoiceSendLog.insert();
+        
+            counter++;
+        
+            // Update sent flag
+            select forUpdate recordsUpdate where recordsUpdate.RecId == records.RecId;
+            if(recordsUpdate)
+            {
+                recordsUpdate.Send = NoYes::Yes;
+                ttsBegin;
+                recordsUpdate.doUpdate();
+                ttsCommit;
+            }
+        
+            records = CustInvoiceJour_ds.getNext();
+        }
+        
+        if(EmailSend) info(strFmt("No. of Email Sent is: %1",counter-1));
+        info("mgo");
+    }
+
+}
