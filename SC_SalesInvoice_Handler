@@ -98,8 +98,10 @@ internal final class SC_SalesInvoice_Handler
             //////////////////////
             if(CommissionSalesGroup.ISSadad)
             {
+                str arabicPaymentText;
+                str englishPaymentText;
+                str arabicMonthText;
 
-           
                 if(records.DataAreaId == 'mjic')
                 {
                     emailContract.parmSubject("Clear Water Bill");
@@ -108,53 +110,52 @@ internal final class SC_SalesInvoice_Handler
                 {
                     emailContract.parmSubject("ICDOC Bill");
                 }
-                mailBody = " عميلنا العزيز "+"\n\n";
-                mailBody = mailBody + " السلام عليكم ورحمة الله وبركاته "+"\n\n";
-               
-                
+                englishPaymentText = "Please <b>use Invoice Reference -Edaat Invoice No</b> SADAD system as mentioned in your bill.";
+                arabicPaymentText = "برجاء سداد كامل المستحقات </b> باستخدام رقم دليل الفاتورة - فاتورة ايداعات <b> المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد";
+
                 switch (mthOfYr(Startdate))
                 {
                     case 1:
-                        mailBody = mailBody +  "لقد تم اصدار فاتورة شهر يناير، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        arabicMonthText = "لقد تم اصدار فاتورة شهر يناير، " + arabicPaymentText;
                         break;
                     case 2:
-                        mailBody = mailBody +  "لقد تم اصدار فاتورة شهر فبراير، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        arabicMonthText = "لقد تم اصدار فاتورة شهر فبراير، " + arabicPaymentText;
                         break;
                     case 3:
-                        mailBody = mailBody +  "لقد تم اصدار فاتورة شهر مارس، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        arabicMonthText = "لقد تم اصدار فاتورة شهر مارس، " + arabicPaymentText;
                         break;
                     case 4:
-                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر ابريل، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        arabicMonthText = "لقد تم اصدار فاتورة شهر ابريل، " + arabicPaymentText;
                         break;
                     case 5:
-                        mailBody = mailBody +  "لقد تم اصدار فاتورة شهر مايو، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        arabicMonthText = "لقد تم اصدار فاتورة شهر مايو، " + arabicPaymentText;
                         break;
                     case 6:
-                        mailBody = mailBody +  "لقد تم اصدار فاتورة شهر يونيو، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        arabicMonthText = "لقد تم اصدار فاتورة شهر يونيو، " + arabicPaymentText;
                         break;
                     case 7:
-                        mailBody = mailBody +  "لقد تم اصدار فاتورة شهر يوليو، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        arabicMonthText = "لقد تم اصدار فاتورة شهر يوليو، " + arabicPaymentText;
                         break;
                     case 8:
-                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر اغسطس، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        arabicMonthText = "لقد تم اصدار فاتورة شهر اغسطس، " + arabicPaymentText;
                         break;
                     case 9:
-                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر سبتمبر، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        arabicMonthText = "لقد تم اصدار فاتورة شهر سبتمبر، " + arabicPaymentText;
                         break;
                     case 10:
-                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر اكتوبر، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        arabicMonthText = "لقد تم اصدار فاتورة شهر اكتوبر، " + arabicPaymentText;
                         break;
                     case 11:
-                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر نوفمبر، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        arabicMonthText = "لقد تم اصدار فاتورة شهر نوفمبر، " + arabicPaymentText;
                         break;
                     case 12:
-                        mailBody = mailBody + "لقد تم اصدار فاتورة شهر ديسمبر، برجاء سداد كامل المستحقات باستخدام رقم العميل المدون في الفاتورة أثناء عملية الدفع من خلال نظام سداد"+"\n\n";
+                        arabicMonthText = "لقد تم اصدار فاتورة شهر ديسمبر، " + arabicPaymentText;
                         break;
                 }
-                mailBody = mailBody + "\n\n Dear Valued Customer, \n\n";
-                mailBody = mailBody + " Hope That this email finds you well.\n\n";
-                mailBody = mailBody + " Kindly , find the attached bill for the month of "+ mthName(mthOfYr(Startdate));
-                mailBody = mailBody + ", please use your account number to pay through SADAD system as mentioned in your bill.\n\n";
+
+                mailBody = "<div dir='rtl' style='text-align:right;'>عميلنا العزيز السلام عليكم ورحمة الله وبركاته " + arabicMonthText + "</div>";
+                mailBody = mailBody + "<br>";
+                mailBody = mailBody + "<div dir='ltr' style='text-align:left;'>Dear Valued Customer, Hope That this email finds you well. Kindly find the attached bill for the month of " + mthName(mthOfYr(Startdate)) + ". " + englishPaymentText + "</div>";
             }
             else //if(CustTable::find(records.InvoiceAccount).CustGroup == '02')
             {
@@ -219,6 +220,10 @@ internal final class SC_SalesInvoice_Handler
             //}
         
             select userinfo where userinfo.id == curUserId();
+            if (!strScan(mailBody, "<", 1, strLen(mailBody)))
+            {
+                mailBody = strReplace(mailBody, "\n", "<br>");
+            }
             emailContract.parmBody(mailBody);
             emailContract.parmTo(CustTable::find(records.InvoiceAccount).email());
         
